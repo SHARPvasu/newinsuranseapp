@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("employee") // "owner" | "employee"
+  phone     String?
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customers Customer[]
+  leads     Lead[]
+  calls     CallRecord[]
+  claims    Claim[]
+  commissions Commission[]
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  customerId     String   @unique
+  isExisting     Boolean  @default(false)
+  name           String
+  phone          String
+  email          String?
+  address        String?
+  dob            String?
+  status         String   @default("pending") // pending, approved, rejected
+  agentId        String
+  agent          User     @relation(fields: [agentId], references: [id])
+  documents      Json?    // Storing document metadata structure here for simplicity
+  livePhoto      String?  @db.Text
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  notificationSent Boolean @default(false)
+  approvedBy     String?
+  approvedAt     DateTime?
+  rejectionReason String?
+
+  policies       Policy[]
+  commissions    Commission[]
+  claims         Claim[]
+}
+
+model Policy {
+  id           String   @id @default(uuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type         String   // health, life, motor, miscellaneous
+  policyNumber String?
+  insurer      String
+  premium      Float
+  sumAssured   Float
+  startDate    String
+  endDate      String
+  status       String   @default("pending")
+  renewalDate  String?
+  documents    Json?
+  
+  // Type specific details stored as JSON blocks to accommodate diverse schemas easily
+  healthDetails Json?
+  lifeDetails   Json?
+  motorDetails  Json?
+  miscDetails   Json?
+
+  createdAt    DateTime @default(now())
+  createdBy    String
+  agentId      String
+
+  commissions  Commission[]
+  claims       Claim[]
+}
+
+model Lead {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String
+  email         String?
+  source        String
+  status        String   @default("new")
+  policyInterest Json?   // Array of strings
+  notes         String?
+  agentId       String
+  agent         User     @relation(fields: [agentId], references: [id])
+  followUpDate  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  calls         CallRecord[]
+}
+
+model CallRecord {
+  id          String   @id @default(uuid())
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id])
+  agentId     String
+  agent       User     @relation(fields: [agentId], references: [id])
+  contactName String
+  phone       String
+  duration    Int      // minutes
+  status      String   @default("completed")
+  notes       String?
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+model Claim {
+  id             String   @id @default(uuid())
+  claimNumber    String   @unique
+  policyId       String
+  policy         Policy   @relation(fields: [policyId], references: [id])
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
+  customerName   String
+  policyNumber   String
+  policyType     String
+  claimDate      String
+  claimAmount    Float
+  approvedAmount Float    @default(0)
+  status         String   @default("submitted")
+  claimType      String
+  description    String?
+  documents      Json?
+  notes          String?
+  agentId        String
+  agent          User     @relation(fields: [agentId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model Commission {
+  id             String   @id @default(uuid())
+  agentId        String
+  agent          User     @relation(fields: [agentId], references: [id])
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
+  customerName   String
+  policyId       String
+  policy         Policy   @relation(fields: [policyId], references: [id])
+  policyNumber   String
+  policyType     String
+  commissionType String
+  amount         Float
+  status         String   @default("pending")
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String   // e.g. "CREATE", "UPDATE", "DELETE"
+  entityType String   // e.g. "Customer", "Policy"
+  entityId   String
+  details    Json?
+  createdAt  DateTime @default(now())
+}
