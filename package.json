@@ -38,6 +38,7 @@
     "tailwind-merge": "3.4.0",
     "ws": "^8.19.0",
     "zod": "^4.3.6",
+    "tsx": "^4.21.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
@@ -54,7 +55,6 @@
     "prisma": "^5.22.0",
     "tailwindcss": "4.1.17",
     "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "7.2.4",
     "vite-plugin-singlefile": "2.3.0"
