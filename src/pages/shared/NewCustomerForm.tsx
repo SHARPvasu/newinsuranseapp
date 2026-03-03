@@ -157,7 +157,7 @@ export default function NewCustomerForm({ isEmployee }: Props) {
     if (prev) setStep(prev);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!basicInfo.name || !basicInfo.phone) {
       toast.error('Name and phone are required');
       setStep('basic');
@@ -245,9 +245,13 @@ export default function NewCustomerForm({ isEmployee }: Props) {
       notificationSent: true,
     };
 
-    addCustomer(customer);
-    toast.success(`${customer.name} submitted for approval! 🎉`);
-    navigate(`${prefix}/customers`);
+    try {
+      await addCustomer(customer);
+      toast.success(`${customer.name} submitted for approval! 🎉`);
+      navigate(`${prefix}/customers`);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to submit customer. Please try again.');
+    }
   };
 
   const stepLabels = ['Basic Info', 'Policy', 'KYC Docs', 'Review'];
@@ -276,8 +280,8 @@ export default function NewCustomerForm({ isEmployee }: Props) {
               <div key={s} className="flex items-center flex-1">
                 <div className="flex flex-col items-center">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${isDone ? 'bg-green-500 text-white' :
-                      isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
-                        'bg-slate-100 text-slate-400'
+                    isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
+                      'bg-slate-100 text-slate-400'
                     }`}>
                     {isDone ? <Check className="w-4 h-4" /> : i + 1}
                   </div>
@@ -388,8 +392,8 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                         key={pt.value}
                         onClick={() => setSelectedPolicyType(pt.value)}
                         className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${selectedPolicyType === pt.value
-                            ? 'border-blue-500 bg-blue-50 shadow-sm'
-                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                       >
                         <pt.icon className={`w-6 h-6 ${selectedPolicyType === pt.value ? 'text-blue-600' : 'text-slate-400'}`} />

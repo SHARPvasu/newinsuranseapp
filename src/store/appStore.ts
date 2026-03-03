@@ -23,7 +23,7 @@ interface AppStore {
   updateUser: (userId: string, updates: Partial<User>) => void;
   deleteUser: (userId: string) => void;
 
-  addCustomer: (customer: Customer) => void;
+  addCustomer: (customer: Customer) => Promise<void>;
   updateCustomer: (customerId: string, updates: Partial<Customer>) => void;
   approveCustomer: (customerId: string, adminId: string) => void;
   rejectCustomer: (customerId: string, reason: string, adminId: string) => void;
@@ -145,8 +145,14 @@ export const useAppStore = create<AppStore>()(
           if (res.ok) {
             const data = await res.json();
             set(state => ({ customers: [...state.customers, data] }));
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `HTTP ${res.status}`);
           }
-        } catch (e) { console.error('Failed to create customer', e); }
+        } catch (e: any) {
+          console.error('Failed to create customer', e);
+          throw e;
+        }
       },
 
       updateCustomer: async (customerId, updates) => {
