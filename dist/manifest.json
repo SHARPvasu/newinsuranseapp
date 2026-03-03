@@ -1,0 +1,48 @@
+{
+  "name": "UV Insurance Agency",
+  "short_name": "UV Insurance",
+  "description": "Professional Insurance Agency Management Platform — manage customers, policies, renewals and more",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Add New Customer",
+      "short_name": "Add Customer",
+      "url": "/employee/customers/new",
+      "icons": [{"src": "/icons/icon.svg", "sizes": "any"}]
+    },
+    {
+      "name": "View Approvals",
+      "short_name": "Approvals",
+      "url": "/owner/approvals",
+      "icons": [{"src": "/icons/icon.svg", "sizes": "any"}]
+    },
+    {
+      "name": "Premium Calculator",
+      "short_name": "Calculator",
+      "url": "/employee/calculator",
+      "icons": [{"src": "/icons/icon.svg", "sizes": "any"}]
+    }
+  ],
+  "prefer_related_applications": false
+}

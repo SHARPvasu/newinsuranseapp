@@ -44,7 +44,7 @@ export default function NewCustomerForm({ isEmployee }: Props) {
     // Life
     occupation: '', annualIncome: '', coverAmount: '', term: '', smoker: false, lifeNotes: '',
     // Motor
-    vehicleType: '', vehicleNumber: '', make: '', model: '', year: '',
+    motorPolicyType: 'comprehensive', vehicleType: '', vehicleNumber: '', make: '', model: '', year: '',
     engineNumber: '', chassisNumber: '', idv: '', previousInsurer: '', motorNotes: '',
     // Misc
     policyName: '', description: '', miscCoverAmount: '', employeeCount: '', specialNotes: '', miscNotes: '',
@@ -207,10 +207,11 @@ export default function NewCustomerForm({ isEmployee }: Props) {
         }),
         ...(selectedPolicyType === 'motor' && {
           motorDetails: {
+            motorPolicyType: policyData.motorPolicyType as any,
             vehicleType: policyData.vehicleType, vehicleNumber: policyData.vehicleNumber,
             make: policyData.make, model: policyData.model, year: policyData.year,
             engineNumber: policyData.engineNumber, chassisNumber: policyData.chassisNumber,
-            idv: policyData.idv, previousInsurer: policyData.previousInsurer, notes: policyData.motorNotes,
+            idv: policyData.motorPolicyType === 'third_party' ? '' : policyData.idv, previousInsurer: policyData.previousInsurer, notes: policyData.motorNotes,
           }
         }),
         ...(selectedPolicyType === 'miscellaneous' && {
@@ -274,16 +275,14 @@ export default function NewCustomerForm({ isEmployee }: Props) {
             return (
               <div key={s} className="flex items-center flex-1">
                 <div className="flex flex-col items-center">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                    isDone ? 'bg-green-500 text-white' :
-                    isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
-                    'bg-slate-100 text-slate-400'
-                  }`}>
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${isDone ? 'bg-green-500 text-white' :
+                      isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
+                        'bg-slate-100 text-slate-400'
+                    }`}>
                     {isDone ? <Check className="w-4 h-4" /> : i + 1}
                   </div>
-                  <span className={`text-xs mt-1 font-medium hidden sm:block ${
-                    isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-slate-400'
-                  }`}>{label}</span>
+                  <span className={`text-xs mt-1 font-medium hidden sm:block ${isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-slate-400'
+                    }`}>{label}</span>
                 </div>
                 {i < 3 && (
                   <div className={`flex-1 h-1 mx-2 rounded-full transition-all ${isDone ? 'bg-green-400' : 'bg-slate-100'}`} />
@@ -388,11 +387,10 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                       <button
                         key={pt.value}
                         onClick={() => setSelectedPolicyType(pt.value)}
-                        className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
-                          selectedPolicyType === pt.value
+                        className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${selectedPolicyType === pt.value
                             ? 'border-blue-500 bg-blue-50 shadow-sm'
                             : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                        }`}
+                          }`}
                       >
                         <pt.icon className={`w-6 h-6 ${selectedPolicyType === pt.value ? 'text-blue-600' : 'text-slate-400'}`} />
                         <div>
@@ -537,7 +535,14 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                   <div className="space-y-4 border border-amber-100 rounded-xl p-4 bg-amber-50/30">
                     <div className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Vehicle Details</div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
+                      <div className="col-span-2 sm:col-span-1">
+                        <label className="block text-xs font-medium text-slate-600 mb-1">Insurance Type</label>
+                        <select name="motorPolicyType" value={policyData.motorPolicyType} onChange={handlePolicyChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                          <option value="comprehensive">Comprehensive</option>
+                          <option value="third_party">Third Party Only</option>
+                        </select>
+                      </div>
+                      <div className="col-span-2 sm:col-span-1">
                         <label className="block text-xs font-medium text-slate-600 mb-1">Vehicle Type</label>
                         <select name="vehicleType" value={policyData.vehicleType} onChange={handlePolicyChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                           <option value="">Select type</option>
@@ -560,10 +565,12 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                         <label className="block text-xs font-medium text-slate-600 mb-1">Year of Manufacture</label>
                         <input name="year" value={policyData.year} onChange={handlePolicyChange} placeholder="2022" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">IDV (₹)</label>
-                        <input name="idv" type="number" value={policyData.idv} onChange={handlePolicyChange} placeholder="550000" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                      </div>
+                      {policyData.motorPolicyType !== 'third_party' && (
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">IDV (₹)</label>
+                          <input name="idv" type="number" value={policyData.idv} onChange={handlePolicyChange} placeholder="550000" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-medium text-slate-600 mb-1">Engine Number</label>
                         <input name="engineNumber" value={policyData.engineNumber} onChange={handlePolicyChange} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
@@ -639,10 +646,10 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                     {selectedPolicyType === 'motor'
                       ? 'Aadhaar Card (Front) • PAN Card • RC Book (Registration Certificate)'
                       : selectedPolicyType === 'health'
-                      ? 'Aadhaar Card (Front & Back) • PAN Card • Passport Photo'
-                      : selectedPolicyType === 'life'
-                      ? 'Aadhaar Card (Front & Back) • PAN Card • Passport Photo'
-                      : 'Aadhaar Card / Company ID • PAN Card / GST Certificate'}
+                        ? 'Aadhaar Card (Front & Back) • PAN Card • Passport Photo'
+                        : selectedPolicyType === 'life'
+                          ? 'Aadhaar Card (Front & Back) • PAN Card • Passport Photo'
+                          : 'Aadhaar Card / Company ID • PAN Card / GST Certificate'}
                   </p>
                 </div>
               </div>
@@ -657,39 +664,38 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                 { label: 'PAN Card', state: panCard, setter: setPanCard, key: 'pan', required: true },
                 { label: 'RC Book (Registration Certificate)', state: rcBook, setter: setRcBook, key: 'rc', required: selectedPolicyType === 'motor' },
               ]
-              .filter(doc => doc.required || doc.state) // show non-required only if already uploaded
-              .map(({ label, state, setter, key, required }) => (
-                <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                  state ? 'bg-green-50 border-green-200' : required ? 'bg-red-50/50 border-red-200/60' : 'border-slate-200 bg-slate-50/50'
-                }`}>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-700 flex items-center gap-1">
-                      {state ? <Check className="w-4 h-4 text-green-600" /> : <FileText className="w-4 h-4 text-slate-400" />}
-                      {label}
-                      {required && <span className="text-red-500 text-xs">*</span>}
+                .filter(doc => doc.required || doc.state) // show non-required only if already uploaded
+                .map(({ label, state, setter, key, required }) => (
+                  <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${state ? 'bg-green-50 border-green-200' : required ? 'bg-red-50/50 border-red-200/60' : 'border-slate-200 bg-slate-50/50'
+                    }`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                        {state ? <Check className="w-4 h-4 text-green-600" /> : <FileText className="w-4 h-4 text-slate-400" />}
+                        {label}
+                        {required && <span className="text-red-500 text-xs">*</span>}
+                      </div>
+                      {state ? (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-green-600 truncate">{state.name}</span>
+                          <button onClick={() => setter(null)} className="text-red-400 hover:text-red-600 flex-shrink-0">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={`text-xs mt-0.5 ${required ? 'text-red-400' : 'text-slate-400'}`}>
+                          {required ? 'Required — not uploaded' : 'Not uploaded'}
+                        </div>
+                      )}
                     </div>
-                    {state ? (
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-green-600 truncate">{state.name}</span>
-                        <button onClick={() => setter(null)} className="text-red-400 hover:text-red-600 flex-shrink-0">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className={`text-xs mt-0.5 ${required ? 'text-red-400' : 'text-slate-400'}`}>
-                        {required ? 'Required — not uploaded' : 'Not uploaded'}
-                      </div>
-                    )}
+                    <label className="flex-shrink-0 flex items-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg transition-colors">
+                      <Upload className="w-3.5 h-3.5" /> Upload
+                      <input
+                        type="file" accept="image/*,.pdf" className="hidden"
+                        onChange={e => handleFileUpload(e, setter)}
+                      />
+                    </label>
                   </div>
-                  <label className="flex-shrink-0 flex items-center gap-1.5 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg transition-colors">
-                    <Upload className="w-3.5 h-3.5" /> Upload
-                    <input
-                      type="file" accept="image/*,.pdf" className="hidden"
-                      onChange={e => handleFileUpload(e, setter)}
-                    />
-                  </label>
-                </div>
-              ))}
+                ))}
 
               {/* Show RC Book upload option for non-motor if they want */}
               {selectedPolicyType !== 'motor' && !rcBook && (
@@ -849,13 +855,13 @@ export default function NewCustomerForm({ isEmployee }: Props) {
                   { label: 'Live Photo', uploaded: !!livePhoto, required: false },
                   { label: `Other Docs (${otherDocs.length})`, uploaded: otherDocs.length > 0, required: false },
                 ]
-                .filter(({ required, uploaded }) => required || uploaded)
-                .map(({ label, uploaded, required }) => (
-                  <div key={label} className={`flex items-center gap-1.5 ${uploaded ? 'text-green-700' : required ? 'text-red-500' : 'text-slate-400'}`}>
-                    {uploaded ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                    {label} {required && !uploaded && <span className="text-red-500">*</span>}
-                  </div>
-                ))}
+                  .filter(({ required, uploaded }) => required || uploaded)
+                  .map(({ label, uploaded, required }) => (
+                    <div key={label} className={`flex items-center gap-1.5 ${uploaded ? 'text-green-700' : required ? 'text-red-500' : 'text-slate-400'}`}>
+                      {uploaded ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                      {label} {required && !uploaded && <span className="text-red-500">*</span>}
+                    </div>
+                  ))}
               </div>
             </div>
 

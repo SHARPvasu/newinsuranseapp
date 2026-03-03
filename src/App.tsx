@@ -53,13 +53,14 @@ export function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const API_URL = import.meta.env.VITE_API_URL || '/api';
         const [custRes, leadsRes, claimsRes, commRes, callsRes, usersRes] = await Promise.all([
-          fetch('http://localhost:3001/api/customers'),
-          fetch('http://localhost:3001/api/leads'),
-          fetch('http://localhost:3001/api/claims'),
-          fetch('http://localhost:3001/api/commissions'),
-          fetch('http://localhost:3001/api/calls'),
-          fetch('http://localhost:3001/api/users')
+          fetch(`${API_URL}/customers`),
+          fetch(`${API_URL}/leads`),
+          fetch(`${API_URL}/claims`),
+          fetch(`${API_URL}/commissions`),
+          fetch(`${API_URL}/calls`),
+          fetch(`${API_URL}/users`)
         ]);
 
         const [customers, leads, claims, commissions, calls, users] = await Promise.all([

@@ -82,6 +82,7 @@ export default function PremiumCalculator() {
   const [lifeType, setLifeType] = useState<'term' | 'endowment' | 'ulip'>('term');
 
   // Motor inputs
+  const [motorPolicyType, setMotorPolicyType] = useState('comprehensive');
   const [vehicleType, setVehicleType] = useState('Car');
   const [idv, setIdv] = useState('500000');
   const [vehicleAge, setVehicleAge] = useState('2');
@@ -231,14 +232,17 @@ export default function PremiumCalculator() {
       const odRate = MOTOR_OD_RATES[vehicleType]?.[ageGroup] || 0.025;
 
       // Own Damage Premium
-      let odPremium = Math.round(iv * odRate);
-      breakdown.push({ label: 'Own Damage (OD) Premium', amount: odPremium, info: `IDV ₹${iv.toLocaleString('en-IN')} × ${(odRate * 100).toFixed(1)}%` });
+      let odPremium = 0;
+      if (motorPolicyType === 'comprehensive') {
+        odPremium = Math.round(iv * odRate);
+        breakdown.push({ label: 'Own Damage (OD) Premium', amount: odPremium, info: `IDV ₹${iv.toLocaleString('en-IN')} × ${(odRate * 100).toFixed(1)}%` });
 
-      // NCB Discount
-      if (ncbPct > 0) {
-        const ncbDiscount = Math.round(odPremium * ncbPct / 100);
-        breakdown.push({ label: `NCB Discount (${ncbPct}%)`, amount: -ncbDiscount, info: 'No Claim Bonus for claim-free years' });
-        odPremium -= ncbDiscount;
+        // NCB Discount
+        if (ncbPct > 0) {
+          const ncbDiscount = Math.round(odPremium * ncbPct / 100);
+          breakdown.push({ label: `NCB Discount (${ncbPct}%)`, amount: -ncbDiscount, info: 'No Claim Bonus for claim-free years' });
+          odPremium -= ncbDiscount;
+        }
       }
 
       // Third Party Premium (fixed by IRDAI)
@@ -402,13 +406,13 @@ export default function PremiumCalculator() {
                 <div>
                   <label className={lbl}>Number of Members</label>
                   <select value={familySize} onChange={e => setFamilySize(e.target.value)} className={inp}>
-                    {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n} {n===1?'member':'members'}</option>)}
+                    {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} {n === 1 ? 'member' : 'members'}</option>)}
                   </select>
                 </div>
               )}
               <div>
                 <label className={lbl}>City Zone</label>
-                <select value={zone} onChange={e => setZone(e.target.value as 'A'|'B'|'C')} className={inp}>
+                <select value={zone} onChange={e => setZone(e.target.value as 'A' | 'B' | 'C')} className={inp}>
                   <option value="A">Zone A (Metro - Mumbai, Delhi)</option>
                   <option value="B">Zone B (Tier 1 cities)</option>
                   <option value="C">Zone C (Other cities)</option>
@@ -462,7 +466,7 @@ export default function PremiumCalculator() {
               <div>
                 <label className={lbl}>Policy Term (years)</label>
                 <select value={term} onChange={e => setTerm(e.target.value)} className={inp}>
-                  {[5,10,15,20,25,30,35,40].map(t => <option key={t} value={t}>{t} years</option>)}
+                  {[5, 10, 15, 20, 25, 30, 35, 40].map(t => <option key={t} value={t}>{t} years</option>)}
                 </select>
               </div>
             </div>
@@ -473,20 +477,28 @@ export default function PremiumCalculator() {
           </div>
         )}
 
-        {/* ====== MOTOR ====== */}
         {type === 'motor' && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={lbl}>Insurance Type</label>
+                <select value={motorPolicyType} onChange={e => setMotorPolicyType(e.target.value)} className={inp}>
+                  <option value="comprehensive">Comprehensive</option>
+                  <option value="third_party">Third Party Only</option>
+                </select>
+              </div>
               <div>
                 <label className={lbl}>Vehicle Type *</label>
                 <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={inp}>
                   {Object.keys(MOTOR_OD_RATES).map(v => <option key={v}>{v}</option>)}
                 </select>
               </div>
-              <div>
-                <label className={lbl}>IDV (Insured Declared Value ₹) *</label>
-                <input type="number" value={idv} onChange={e => setIdv(e.target.value)} placeholder="500000" className={inp} />
-              </div>
+              {motorPolicyType === 'comprehensive' && (
+                <div>
+                  <label className={lbl}>IDV (Insured Declared Value ₹) *</label>
+                  <input type="number" value={idv} onChange={e => setIdv(e.target.value)} placeholder="500000" className={inp} />
+                </div>
+              )}
               <div>
                 <label className={lbl}>Vehicle Age (years)</label>
                 <input type="number" value={vehicleAge} onChange={e => setVehicleAge(e.target.value)} placeholder="2" className={inp} />
@@ -495,38 +507,42 @@ export default function PremiumCalculator() {
                 <label className={lbl}>Engine CC</label>
                 <input type="number" value={cc} onChange={e => setCc(e.target.value)} placeholder="1200" className={inp} />
               </div>
+              {motorPolicyType === 'comprehensive' && (
+                <div>
+                  <label className={lbl}>NCB (No Claim Bonus %)</label>
+                  <select value={ncb} onChange={e => setNcb(e.target.value)} className={inp}>
+                    <option value="0">0% (First year / Claim made)</option>
+                    <option value="20">20% (1 claim-free year)</option>
+                    <option value="25">25% (2 claim-free years)</option>
+                    <option value="35">35% (3 claim-free years)</option>
+                    <option value="45">45% (4 claim-free years)</option>
+                    <option value="50">50% (5+ claim-free years)</option>
+                  </select>
+                </div>
+              )}
+            </div>
+            {motorPolicyType === 'comprehensive' && (
               <div>
-                <label className={lbl}>NCB (No Claim Bonus %)</label>
-                <select value={ncb} onChange={e => setNcb(e.target.value)} className={inp}>
-                  <option value="0">0% (First year / Claim made)</option>
-                  <option value="20">20% (1 claim-free year)</option>
-                  <option value="25">25% (2 claim-free years)</option>
-                  <option value="35">35% (3 claim-free years)</option>
-                  <option value="45">45% (4 claim-free years)</option>
-                  <option value="50">50% (5+ claim-free years)</option>
-                </select>
+                <label className={lbl}>Add-on Covers</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: 'zeroDepreciation', label: 'Zero Depreciation', desc: 'Full claim amount' },
+                    { key: 'engineProtect', label: 'Engine Protector', desc: 'Water damage cover' },
+                    { key: 'roadAssist', label: 'Road Assistance', desc: '24×7 breakdown help' },
+                    { key: 'passengerCover', label: 'Passenger Cover', desc: 'Passenger PA cover' },
+                  ].map(a => (
+                    <label key={a.key} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${addons[a.key as keyof typeof addons] ? 'bg-amber-50 border-amber-200' : 'border-slate-200 hover:bg-slate-50'}`}>
+                      <input type="checkbox" checked={addons[a.key as keyof typeof addons]}
+                        onChange={e => setAddons(prev => ({ ...prev, [a.key]: e.target.checked }))} className="w-3.5 h-3.5 accent-amber-600" />
+                      <div>
+                        <div className="text-xs font-medium text-slate-700">{a.label}</div>
+                        <div className="text-xs text-slate-400">{a.desc}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className={lbl}>Add-on Covers</label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { key: 'zeroDepreciation', label: 'Zero Depreciation', desc: 'Full claim amount' },
-                  { key: 'engineProtect', label: 'Engine Protector', desc: 'Water damage cover' },
-                  { key: 'roadAssist', label: 'Road Assistance', desc: '24×7 breakdown help' },
-                  { key: 'passengerCover', label: 'Passenger Cover', desc: 'Passenger PA cover' },
-                ].map(a => (
-                  <label key={a.key} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${addons[a.key as keyof typeof addons] ? 'bg-amber-50 border-amber-200' : 'border-slate-200 hover:bg-slate-50'}`}>
-                    <input type="checkbox" checked={addons[a.key as keyof typeof addons]}
-                      onChange={e => setAddons(prev => ({ ...prev, [a.key]: e.target.checked }))} className="w-3.5 h-3.5 accent-amber-600" />
-                    <div>
-                      <div className="text-xs font-medium text-slate-700">{a.label}</div>
-                      <div className="text-xs text-slate-400">{a.desc}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         )}
 

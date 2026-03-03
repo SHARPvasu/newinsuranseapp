@@ -80,7 +80,7 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
     policyNumber: '', insurer: '', premium: '', sumAssured: '', startDate: '', endDate: '',
     height: '', weight: '', medicalConditions: '', rareConditions: '', notes: '',
     occupation: '', annualIncome: '', smoker: false, coverAmount: '', term: '',
-    vehicleType: '', vehicleNumber: '', make: '', model: '', year: '',
+    motorPolicyType: 'comprehensive', vehicleType: '', vehicleNumber: '', make: '', model: '', year: '',
     engineNumber: '', chassisNumber: '', idv: '', previousInsurer: '',
     policyName: '', description: '', coverAmountMisc: '', employeeCount: '', specialNotes: '',
   });
@@ -206,7 +206,7 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
         lifeDetails: { occupation: formData.occupation, annualIncome: formData.annualIncome, smoker: formData.smoker, coverAmount: formData.coverAmount, term: formData.term, nominees, notes: formData.notes }
       }),
       ...(policyType === 'motor' && {
-        motorDetails: { vehicleType: formData.vehicleType, vehicleNumber: formData.vehicleNumber, make: formData.make, model: formData.model, year: formData.year, engineNumber: formData.engineNumber, chassisNumber: formData.chassisNumber, idv: formData.idv, previousInsurer: formData.previousInsurer, notes: formData.notes }
+        motorDetails: { motorPolicyType: formData.motorPolicyType as any, vehicleType: formData.vehicleType, vehicleNumber: formData.vehicleNumber, make: formData.make, model: formData.model, year: formData.year, engineNumber: formData.engineNumber, chassisNumber: formData.chassisNumber, idv: formData.motorPolicyType === 'third_party' ? '' : formData.idv, previousInsurer: formData.previousInsurer, notes: formData.notes }
       }),
       ...(policyType === 'miscellaneous' && {
         miscDetails: { policyName: formData.policyName, description: formData.description, coverAmount: formData.coverAmountMisc, employeeCount: formData.employeeCount, specialNotes: formData.specialNotes, notes: formData.notes }
@@ -265,10 +265,9 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
       <div className="flex items-center gap-1">
         {steps.map((s, i) => (
           <div key={s.key} className="flex items-center flex-1">
-            <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all ${
-              step === s.key ? 'bg-blue-600 text-white' :
-              stepIndex > i ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-            }`}>
+            <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all ${step === s.key ? 'bg-blue-600 text-white' :
+                stepIndex > i ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
+              }`}>
               {stepIndex > i ? <Check className="w-3 h-3" /> : <span>{i + 1}</span>}
               <span className="hidden sm:inline">{s.label}</span>
             </div>
@@ -317,9 +316,8 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
                 return (
                   <button key={customer.id}
                     onClick={() => setSelectedCustomerId(customer.id)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      isSelected ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-100 hover:border-blue-200 hover:bg-slate-50'
-                    }`}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${isSelected ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-100 hover:border-blue-200 hover:bg-slate-50'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       {customer.livePhoto ? (
@@ -409,9 +407,8 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {policyTypes.map(pt => (
                 <button key={pt.value} onClick={() => { setPolicyType(pt.value); setUploadedDocs({}); setOtherDocs([]); }}
-                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all ${
-                    policyType === pt.value ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
-                  }`}
+                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all ${policyType === pt.value ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                    }`}
                 >
                   <pt.icon className={`w-5 h-5 ${policyType === pt.value ? 'text-blue-600' : 'text-slate-400'}`} />
                   <span className="text-xs font-medium text-slate-800">{pt.label}</span>
@@ -500,12 +497,13 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
               <div className="space-y-3 border border-amber-100 rounded-xl p-4 bg-amber-50/30">
                 <div className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Vehicle Details</div>
                 <div className="grid grid-cols-2 gap-3">
+                  <div><label className="block text-xs font-medium text-slate-600 mb-1">Insurance Type</label><select name="motorPolicyType" value={formData.motorPolicyType} onChange={handleChange} className={inp}><option value="comprehensive">Comprehensive</option><option value="third_party">Third Party Only</option></select></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Vehicle Type</label><select name="vehicleType" value={formData.vehicleType} onChange={handleChange} className={inp}><option value="">Select</option><option>Car</option><option>Bike</option><option>Truck</option><option>Bus</option><option>Auto</option><option>Commercial Vehicle</option></select></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Vehicle Number *</label><input name="vehicleNumber" value={formData.vehicleNumber} onChange={handleChange} placeholder="MH01AB1234" className={inp} /></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Make</label><input name="make" value={formData.make} onChange={handleChange} placeholder="Maruti" className={inp} /></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Model</label><input name="model" value={formData.model} onChange={handleChange} placeholder="Swift" className={inp} /></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Year</label><input name="year" value={formData.year} onChange={handleChange} placeholder="2022" className={inp} /></div>
-                  <div><label className="block text-xs font-medium text-slate-600 mb-1">IDV (₹)</label><input name="idv" type="number" value={formData.idv} onChange={handleChange} className={inp} /></div>
+                  {formData.motorPolicyType !== 'third_party' && <div><label className="block text-xs font-medium text-slate-600 mb-1">IDV (₹)</label><input name="idv" type="number" value={formData.idv} onChange={handleChange} className={inp} /></div>}
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Engine Number</label><input name="engineNumber" value={formData.engineNumber} onChange={handleChange} className={inp} /></div>
                   <div><label className="block text-xs font-medium text-slate-600 mb-1">Chassis Number</label><input name="chassisNumber" value={formData.chassisNumber} onChange={handleChange} className={inp} /></div>
                 </div>
@@ -558,9 +556,8 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
               </div>
               <div className="space-y-3">
                 {docRequirements.required.map(doc => (
-                  <div key={doc.key} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                    uploadedDocs[doc.key] ? 'bg-green-50 border-green-200' : 'bg-red-50/50 border-red-200/60'
-                  }`}>
+                  <div key={doc.key} className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${uploadedDocs[doc.key] ? 'bg-green-50 border-green-200' : 'bg-red-50/50 border-red-200/60'
+                    }`}>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
                         {uploadedDocs[doc.key] ? <Check className="w-4 h-4 text-green-600" /> : <FileText className="w-4 h-4 text-red-400" />}
@@ -587,9 +584,8 @@ export default function ExistingCustomerPolicy({ isEmployee }: Props) {
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Optional Documents</div>
               <div className="space-y-2">
                 {docRequirements.optional.map(doc => (
-                  <div key={doc.key} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    uploadedDocs[doc.key] ? 'bg-green-50 border-green-200' : 'border-slate-200 bg-slate-50/50'
-                  }`}>
+                  <div key={doc.key} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${uploadedDocs[doc.key] ? 'bg-green-50 border-green-200' : 'border-slate-200 bg-slate-50/50'
+                    }`}>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
                         {uploadedDocs[doc.key] ? <Check className="w-4 h-4 text-green-600" /> : <FileText className="w-4 h-4 text-slate-400" />}

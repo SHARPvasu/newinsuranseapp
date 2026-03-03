@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import prisma from './db';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load env variables
 dotenv.config();
@@ -10,7 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Helper to log audits natively
 async function logAudit(userId: string, action: string, entityType: string, entityId: string, details: any = {}) {
@@ -282,7 +287,15 @@ const initializeDatabase = async () => {
     }
 };
 
+// Serve static frontend files 
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// SPA fallback for any unhandled routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
+
 app.listen(PORT, async () => {
     await initializeDatabase();
-    console.log(`Server API is running on http://localhost:${PORT}`);
+    console.log(`Server API is running on port ${PORT}`);
 });

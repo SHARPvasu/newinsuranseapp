@@ -164,9 +164,8 @@ export default function CustomerDetail({ isEmployee }: Props) {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-medium capitalize border-b-2 transition-colors ${
-                activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
+              className={`pb-3 text-sm font-medium capitalize border-b-2 transition-colors ${activeTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
             >
               {tab} {tab === 'policies' ? `(${customer.policies.length})` : tab === 'documents' ? `(${customer.documents.length + (customer.livePhoto ? 1 : 0)})` : ''}
             </button>
@@ -327,6 +326,7 @@ export default function CustomerDetail({ isEmployee }: Props) {
                         {/* Motor details */}
                         {p.motorDetails && (
                           <div className="mt-3 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 space-y-1">
+                            <p><strong>Insurance Type:</strong> {p.motorDetails.motorPolicyType === 'third_party' ? 'Third Party Only' : 'Comprehensive'}</p>
                             <p><strong>Vehicle:</strong> {p.motorDetails.vehicleType} | <strong>Number:</strong> {p.motorDetails.vehicleNumber}</p>
                             <p><strong>Make/Model:</strong> {p.motorDetails.make} {p.motorDetails.model} ({p.motorDetails.year})</p>
                             {p.motorDetails.idv && <p><strong>IDV:</strong> ₹{parseInt(p.motorDetails.idv).toLocaleString('en-IN')}</p>}

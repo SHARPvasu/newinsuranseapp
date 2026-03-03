@@ -46,6 +46,7 @@ export interface LifePolicyDetails {
 }
 
 export interface MotorPolicyDetails {
+  motorPolicyType?: 'comprehensive' | 'third_party';
   vehicleType: string;
   vehicleNumber: string;
   make: string;
